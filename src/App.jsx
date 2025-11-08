@@ -2,15 +2,14 @@ import React, { useState } from 'react';
 import HeroCover from './components/HeroCover';
 import AuthCard from './components/AuthCard';
 import CustomerForm from './components/CustomerForm';
-import MapEmbed from './components/MapEmbed';
+import MapInteractive from './components/MapInteractive';
 
 export default function App() {
   const [user, setUser] = useState(null);
-  const [coords, setCoords] = useState({ lat: '', lng: '' });
+  const [customer, setCustomer] = useState({ name: '', email: '', phone: '', address: '', lat: '', lng: '' });
 
-  const handleSubmitCustomer = (data) => {
-    setCoords({ lat: data.lat, lng: data.lng });
-  };
+  const handleFormChange = (next) => setCustomer(next);
+  const handleMapChange = ({ lat, lng }) => setCustomer((c) => ({ ...c, lat, lng }));
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-slate-950 via-slate-900 to-black text-slate-100">
@@ -25,7 +24,7 @@ export default function App() {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-white">Welcome</h2>
-                  <p className="text-sm text-slate-300">Signed in as {user.email}</p>
+                  <p className="text-sm text-slate-300">Signed in as {user.email} {user.role === 'superadmin' && <span className="ml-2 rounded bg-emerald-500/15 px-2 py-0.5 text-emerald-300 border border-emerald-400/30 text-xs">Superadmin</span>}</p>
                 </div>
                 <button
                   onClick={() => setUser(null)}
@@ -37,11 +36,13 @@ export default function App() {
             </div>
           )}
 
-          <CustomerForm onSubmit={handleSubmitCustomer} />
+          {user && (
+            <CustomerForm value={customer} onChange={handleFormChange} onSubmit={() => {}} />
+          )}
         </div>
 
         <div className="mt-6">
-          <MapEmbed lat={coords.lat} lng={coords.lng} />
+          <MapInteractive lat={customer.lat} lng={customer.lng} onChange={handleMapChange} />
         </div>
       </div>
     </div>

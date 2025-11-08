@@ -1,29 +1,35 @@
 import React, { useState, useEffect } from 'react';
 
-export default function CustomerForm({ onSubmit }) {
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    lat: '',
-    lng: '',
-  });
+export default function CustomerForm({ onSubmit, value, onChange }) {
+  const [form, setForm] = useState(
+    value || { name: '', email: '', phone: '', address: '', lat: '', lng: '' }
+  );
 
   useEffect(() => {
-    // Try geolocation to prefill coordinates
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          setForm((f) => ({ ...f, lat: latitude.toFixed(6), lng: longitude.toFixed(6) }));
-        },
-        () => {}
-      );
+    if (!value) {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const { latitude, longitude } = pos.coords;
+            setForm((f) => ({ ...f, lat: latitude.toFixed(6), lng: longitude.toFixed(6) }));
+            onChange && onChange({ ...form, lat: latitude.toFixed(6), lng: longitude.toFixed(6) });
+          },
+          () => {}
+        );
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const updateField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
+  useEffect(() => {
+    if (value) setForm(value);
+  }, [value]);
+
+  const updateField = (key, val) => {
+    const next = { ...form, [key]: val };
+    setForm(next);
+    onChange && onChange(next);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
